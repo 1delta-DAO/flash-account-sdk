@@ -13,7 +13,24 @@ import { createEnterMarketsCall as compoundCreateEnterMarketsCall } from "../src
 const TEST_ENTRY_POINT =
   "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789" as Address;
 
-const TEST_RECEIVER = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" as Address;
+// Flash account address (used as the receiver)
+const FLASH_ACCOUNT_ADDRESS =
+  "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" as Address;
+
+// Execute ABI for the FlashAccount
+const FLASH_ACCOUNT_EXECUTE_ABI = [
+  {
+    type: "function",
+    name: "execute",
+    inputs: [
+      { name: "dest", type: "address" },
+      { name: "value", type: "uint256" },
+      { name: "func", type: "bytes" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+] as const;
 
 describe("1delta SDK Basic Tests", () => {
   test("isETH should correctly identify ETH addresses", () => {
@@ -40,17 +57,18 @@ describe("1delta SDK Basic Tests", () => {
     );
   });
 
-  test("createFlashLoanCall should create valid calldata for Aave V3", () => {
+  test("createFlashLoanCall should create valid calldata for flash loan through FlashAccount", () => {
     const token = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" as Address;
     const amount = 1000000000n;
-    const receiver = TEST_RECEIVER;
     const chainId = 1;
+    const aavePoolAddress = getAaveV3PoolAddress(chainId);
 
-    const expectedCallData = encodeFunctionData({
+    // Create the expected Aave flash loan calldata
+    const expectedAaveCalldata = encodeFunctionData({
       abi: AAVE_V3_POOL_ABI,
       functionName: "flashLoanSimple",
       args: [
-        receiver,
+        FLASH_ACCOUNT_ADDRESS,
         token,
         amount,
         "0x", // userData
@@ -58,16 +76,28 @@ describe("1delta SDK Basic Tests", () => {
       ],
     });
 
+    // Create the expected execute calldata
+    const expectedExecuteCalldata = encodeFunctionData({
+      abi: FLASH_ACCOUNT_EXECUTE_ABI,
+      functionName: "execute",
+      args: [
+        aavePoolAddress, // Destination is the Aave pool
+        0n, // No ETH value to send
+        expectedAaveCalldata, // Function data for the flash loan call
+      ],
+    });
+
     const result = createFlashLoanCall({
       token,
       amount,
-      receiver,
+      receiver: FLASH_ACCOUNT_ADDRESS,
       chainId,
     });
 
-    expect(result.to).toBe("0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2");
+    // The 'to' should be the FlashAccount address
+    expect(result.to).toBe(FLASH_ACCOUNT_ADDRESS);
     expect(result.value).toBe(0n);
-    expect(result.data).toBe(expectedCallData);
+    expect(result.data).toBe(expectedExecuteCalldata);
   });
 
   test("createEnterMarketsCall should create valid calldata for Compound", () => {
