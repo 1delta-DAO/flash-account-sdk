@@ -1,7 +1,7 @@
 import { type Address, type Chain, type Hex, type Transport } from "viem";
 import type {
   BundlerClient,
-  CreateBundlerClientParameters,
+  BundlerClientConfig,
   SmartAccount,
 } from "viem/account-abstraction";
 import { createBundlerClient } from "viem/account-abstraction";
@@ -12,6 +12,7 @@ import {
   createWithdrawCalls,
   createBorrowCalls,
   createRepayCalls,
+  createEnterMarketsCall,
 } from "../protocols/lending";
 
 /**
@@ -22,7 +23,7 @@ export function createDeFiBundlerClient<
   TChain extends Chain | undefined = Chain | undefined,
   TAccount extends SmartAccount | undefined = SmartAccount | undefined,
 >(
-  parameters: CreateBundlerClientParameters<TTransport, TChain, TAccount>
+  parameters: BundlerClientConfig<TTransport, TChain, TAccount>
 ): BundlerClient<TTransport, TChain, TAccount> & {
   // Flash loan operations
   sendFlashLoan: (params: {
@@ -32,6 +33,7 @@ export function createDeFiBundlerClient<
     userData?: Hex;
     provider?: "aaveV3";
     chainId: number;
+    entryPointAddress: Address;
   }) => Promise<Hex>;
 
   // Compound V2 operations
@@ -40,6 +42,7 @@ export function createDeFiBundlerClient<
     amount: bigint;
     chainId: number;
     protocolToken?: Address;
+    entryPointAddress: Address;
   }) => Promise<Hex>;
 
   withdrawAsset: (params: {
@@ -48,6 +51,7 @@ export function createDeFiBundlerClient<
     chainId: number;
     protocolToken?: Address;
     withdrawAll?: boolean;
+    entryPointAddress: Address;
   }) => Promise<Hex>;
 
   borrowAsset: (params: {
@@ -55,6 +59,7 @@ export function createDeFiBundlerClient<
     amount: bigint;
     chainId: number;
     protocolToken?: Address;
+    entryPointAddress: Address;
   }) => Promise<Hex>;
 
   repayAsset: (params: {
@@ -64,11 +69,13 @@ export function createDeFiBundlerClient<
     protocolToken?: Address;
     repayAll?: boolean;
     borrower?: Address;
+    entryPointAddress: Address;
   }) => Promise<Hex>;
 
   enterMarkets: (params: {
     markets: Address[];
     chainId: number;
+    entryPointAddress: Address;
   }) => Promise<Hex>;
 } {
   // Create base bundler client
@@ -79,7 +86,15 @@ export function createDeFiBundlerClient<
 
     // Flash loan operation
     async sendFlashLoan(params) {
-      const { token, amount, receiver, userData, provider, chainId } = params;
+      const {
+        token,
+        amount,
+        receiver,
+        userData,
+        provider,
+        chainId,
+        entryPointAddress,
+      } = params;
 
       // Check account
       if (!bundlerClient.account) {
@@ -99,12 +114,14 @@ export function createDeFiBundlerClient<
       // Send user operation
       return bundlerClient.sendUserOperation({
         calls: [call],
+        entryPointAddress,
       });
     },
 
     // Supply assets to Compound V2
     async supplyAsset(params) {
-      const { token, amount, chainId, protocolToken } = params;
+      const { token, amount, chainId, protocolToken, entryPointAddress } =
+        params;
 
       // Check account
       if (!bundlerClient.account) {
@@ -122,12 +139,20 @@ export function createDeFiBundlerClient<
       // Send user operation
       return bundlerClient.sendUserOperation({
         calls,
+        entryPointAddress,
       });
     },
 
     // Withdraw assets from Compound V2
     async withdrawAsset(params) {
-      const { token, amount, chainId, protocolToken, withdrawAll } = params;
+      const {
+        token,
+        amount,
+        chainId,
+        protocolToken,
+        withdrawAll,
+        entryPointAddress,
+      } = params;
 
       // Check account
       if (!bundlerClient.account) {
@@ -146,12 +171,14 @@ export function createDeFiBundlerClient<
       // Send user operation
       return bundlerClient.sendUserOperation({
         calls,
+        entryPointAddress,
       });
     },
 
     // Borrow assets from Compound V2
     async borrowAsset(params) {
-      const { token, amount, chainId, protocolToken } = params;
+      const { token, amount, chainId, protocolToken, entryPointAddress } =
+        params;
 
       // Check account
       if (!bundlerClient.account) {
@@ -169,13 +196,21 @@ export function createDeFiBundlerClient<
       // Send user operation
       return bundlerClient.sendUserOperation({
         calls,
+        entryPointAddress,
       });
     },
 
     // Repay borrowed assets to Compound V2
     async repayAsset(params) {
-      const { token, amount, chainId, protocolToken, repayAll, borrower } =
-        params;
+      const {
+        token,
+        amount,
+        chainId,
+        protocolToken,
+        repayAll,
+        borrower,
+        entryPointAddress,
+      } = params;
 
       // Check account
       if (!bundlerClient.account) {
@@ -195,12 +230,13 @@ export function createDeFiBundlerClient<
       // Send user operation
       return bundlerClient.sendUserOperation({
         calls,
+        entryPointAddress,
       });
     },
 
     // Enter markets in Compound V2
     async enterMarkets(params) {
-      const { markets, chainId } = params;
+      const { markets, chainId, entryPointAddress } = params;
 
       // Check account
       if (!bundlerClient.account) {
@@ -213,6 +249,7 @@ export function createDeFiBundlerClient<
       // Send user operation
       return bundlerClient.sendUserOperation({
         calls: [call],
+        entryPointAddress,
       });
     },
   };
