@@ -26,7 +26,7 @@ export function createDeFiBundlerClient<
   parameters: BundlerClientConfig<TTransport, TChain, TAccount>
 ): BundlerClient<TTransport, TChain, TAccount> & {
   // Flash loan operations
-  sendFlashLoan: (params: {
+  FlashLoan: (params: {
     token: Address | Address[];
     amount: bigint | bigint[];
     receiver: Address;
@@ -37,7 +37,7 @@ export function createDeFiBundlerClient<
   }) => Promise<Hex>;
 
   // Compound V2 operations
-  supplyAsset: (params: {
+  compV2_supplyAsset: (params: {
     token: Address | string;
     amount: bigint;
     chainId: number;
@@ -45,7 +45,7 @@ export function createDeFiBundlerClient<
     entryPointAddress: Address;
   }) => Promise<Hex>;
 
-  withdrawAsset: (params: {
+  compV2_withdrawAsset: (params: {
     token: Address | string;
     amount: bigint;
     chainId: number;
@@ -54,7 +54,7 @@ export function createDeFiBundlerClient<
     entryPointAddress: Address;
   }) => Promise<Hex>;
 
-  borrowAsset: (params: {
+  compV2_borrowAsset: (params: {
     token: Address | string;
     amount: bigint;
     chainId: number;
@@ -62,7 +62,7 @@ export function createDeFiBundlerClient<
     entryPointAddress: Address;
   }) => Promise<Hex>;
 
-  repayAsset: (params: {
+  compV2_repayAsset: (params: {
     token: Address | string;
     amount: bigint;
     chainId: number;
@@ -72,7 +72,7 @@ export function createDeFiBundlerClient<
     entryPointAddress: Address;
   }) => Promise<Hex>;
 
-  enterMarkets: (params: {
+  compV2_enterMarkets: (params: {
     markets: Address[];
     chainId: number;
     entryPointAddress: Address;
@@ -85,7 +85,7 @@ export function createDeFiBundlerClient<
     ...bundlerClient,
 
     // Flash loan operation
-    async sendFlashLoan(params) {
+    async FlashLoan(params) {
       const {
         token,
         amount,
@@ -119,7 +119,7 @@ export function createDeFiBundlerClient<
     },
 
     // Supply assets to Compound V2
-    async supplyAsset(params) {
+    async compV2_supplyAsset(params) {
       const { token, amount, chainId, protocolToken, entryPointAddress } =
         params;
 
@@ -144,7 +144,7 @@ export function createDeFiBundlerClient<
     },
 
     // Withdraw assets from Compound V2
-    async withdrawAsset(params) {
+    async compV2_withdrawAsset(params) {
       const {
         token,
         amount,
@@ -176,7 +176,7 @@ export function createDeFiBundlerClient<
     },
 
     // Borrow assets from Compound V2
-    async borrowAsset(params) {
+    async compV2_borrowAsset(params) {
       const { token, amount, chainId, protocolToken, entryPointAddress } =
         params;
 
@@ -201,7 +201,7 @@ export function createDeFiBundlerClient<
     },
 
     // Repay borrowed assets to Compound V2
-    async repayAsset(params) {
+    async compV2_repayAsset(params) {
       const {
         token,
         amount,
@@ -235,7 +235,7 @@ export function createDeFiBundlerClient<
     },
 
     // Enter markets in Compound V2
-    async enterMarkets(params) {
+    async compV2_enterMarkets(params) {
       const { markets, chainId, entryPointAddress } = params;
 
       // Check account
