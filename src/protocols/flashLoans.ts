@@ -2,9 +2,8 @@ import { type Address, type Hex, encodeFunctionData } from "viem";
 import type { FlashLoanParams } from "../types/protocols";
 import { AAVE_V3_POOL_ABI } from "../abis/aave";
 import { getAaveV3PoolAddress } from "../assets";
-import { FlashAccountAbi } from "../types/generated";
 
-// Extract the execute function ABI for FlashAccount
+// Flash Account execute function ABI
 const FLASH_ACCOUNT_EXECUTE_ABI = [
   {
     type: "function",
@@ -82,7 +81,7 @@ export function createFlashLoanCall(params: FlashLoanParams): {
       abi: AAVE_V3_POOL_ABI,
       functionName: "flashLoan",
       args: [
-        receiver, // The FlashAccount itself will handle the executeOperation callback
+        receiver,
         tokens,
         amounts,
         Array(tokens.length).fill(0n), // modes: 0 = no debt
@@ -93,11 +92,9 @@ export function createFlashLoanCall(params: FlashLoanParams): {
     });
   }
 
-  // Create the execute call for the FlashAccount
-  // The execute function will then make the call to Aave's flash loan
   return {
-    to: receiver, // This is the FlashAccount address
-    value: 0n, // No ETH needed for flash loans
+    to: receiver, // flash account address
+    value: 0n, // no ETH needed for flash loans
     data: encodeFunctionData({
       abi: FLASH_ACCOUNT_EXECUTE_ABI,
       functionName: "execute",
