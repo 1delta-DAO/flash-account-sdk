@@ -29,4 +29,4 @@ export {
 } from "./protocols/lending";
 
 // Export bundler client
-export { createDeFiBundlerClient } from "./core/client";
+export { createFlashAccountBundlerClient } from "./core/client";

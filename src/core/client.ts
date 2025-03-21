@@ -18,7 +18,7 @@ import {
 /**
  * Create a DeFi-ready bundler client with flash loan and lending capabilities
  */
-export function createDeFiBundlerClient<
+export function createFlashAccountBundlerClient<
   TTransport extends Transport = Transport,
   TChain extends Chain | undefined = Chain | undefined,
   TAccount extends SmartAccount | undefined = SmartAccount | undefined,
