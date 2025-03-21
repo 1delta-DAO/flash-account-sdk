@@ -1,0 +1,36 @@
+{
+  "name": "1delta-flash-account-sdk",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "devDependencies": {
+    "@1delta/asset-registry": "^0.0.94",
+    "@types/bun": "latest",
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.7",
+    "prettier": "^3.5.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.8.2",
+    "viem": "^2.23.13"
+  },
+  "access": "private",
+  "description": "1Delta Flash Account SDK",
+  "engines": {
+    "bun": ">=1.0.0",
+    "node": ">=16"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "bun run build.ts",
+    "test": "bun test",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write 'src/**/*.ts'",
+    "prepublishOnly": "bun run build"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts"
+}
